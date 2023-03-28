@@ -215,7 +215,7 @@ def CheckVersion(context, packageName, versionString):
 
     versionTxt = pathlib.Path(versionTextFilename).read_text()
     return versionTxt==fullVersionString
-    
+
 # Update generated .version.txt file for a package.
 def UpdateVersion(context, packageName, versionString):
     if(CheckVersion(context, packageName, versionString)):
