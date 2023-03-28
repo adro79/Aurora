@@ -19,6 +19,7 @@ import glob
 import argparse
 import pathlib
 import subprocess
+from sys import platform
 
 programDescription = """
 Deploy HdAurora to the provided USD folder (will build a new USD install if build argument provided)
@@ -60,7 +61,7 @@ usd_mtlx_folder = os.path.join(usd_lib_folder,"MaterialX")
 # Get the Aurora source folders.
 aurora_build_folder = os.path.join(args.aurora_root, args.aurora_cmake_build_folder)
 aurora_build_bin_folder = os.path.join(aurora_build_folder ,"bin",args.config)
-aurora_resource_folder = os.path.join(args.aurora_root, "Libraries", "hdAurora", "resources")
+aurora_resource_folder = os.path.join(args.aurora_root, "Libraries", "HdAurora", "resources")
 aurora_mtlx_folder = os.path.join(aurora_build_bin_folder, "MaterialX")
 
 # If the build arg is set, then build Aurora and USD before deploying.
@@ -100,47 +101,92 @@ def copy_if_changed(src, dst):
 def copy_file(src_folder,dst_folder,name):
     copy_if_changed(os.path.join(src_folder,name), os.path.join(dst_folder,name))
 
+
 # Create target folders if they don't exist.
 os.makedirs(usd_bin_folder, exist_ok=True)
 os.makedirs(usd_lib_folder, exist_ok=True)
 os.makedirs(usd_plugin_folder, exist_ok=True)
 os.makedirs(usd_hdaurora_resource_folder, exist_ok=True)
 
-# Copy plugin JSON.
-copy_file(aurora_resource_folder,usd_hdaurora_resource_folder,"plugInfo.json")
 
-# Copy hdAurora and PDB (if it exists)
-copy_file(aurora_build_bin_folder,usd_plugin_folder,"hdAurora.dll")
-copy_file(aurora_build_bin_folder,usd_plugin_folder,"hdAurora.pdb")
+if platform == "linux" or platform == "linux2":
+    # linux
+    print("Deploying hdAurora on Linux")
+    # Copy plugin JSON.
+    copy_file(aurora_resource_folder+"/linux",usd_hdaurora_resource_folder,"plugInfo.json")
 
-# Copy aurora and PDB (if it exists)
-copy_file(aurora_build_bin_folder,usd_lib_folder,"Aurora.dll")
-copy_file(aurora_build_bin_folder,usd_lib_folder,"Aurora.pdb")
+    aurora_build_lib_folder = os.path.join(aurora_build_folder ,"lib",args.config)
 
-# Copy compiler DLLs.
-copy_file(aurora_build_bin_folder,usd_lib_folder,"dxcompiler.dll")
-copy_file(aurora_build_bin_folder,usd_lib_folder,"dxil.dll")
-copy_file(aurora_build_bin_folder,usd_lib_folder,"slang.dll")
-copy_file(aurora_build_bin_folder,usd_lib_folder,"msvcp140.dll")
-copy_file(aurora_build_bin_folder,usd_lib_folder,"glew32.dll")
+    # Copy hdAurora and PDB (if it exists)
+    copy_file(aurora_build_lib_folder,usd_plugin_folder,"libhdAurora.so")
 
-# Copy MtlX libraries and library folders.
-copy_file(aurora_build_bin_folder,usd_lib_folder,"MaterialXCore.dll")
-copy_file(aurora_build_bin_folder,usd_lib_folder,"MaterialXFormat.dll")
-copy_file(aurora_build_bin_folder,usd_lib_folder,"MaterialXGenGlsl.dll")
-copy_file(aurora_build_bin_folder,usd_lib_folder,"MaterialXGenMdl.dll")
-copy_file(aurora_build_bin_folder,usd_lib_folder,"MaterialXGenOsl.dll")
-copy_file(aurora_build_bin_folder,usd_lib_folder,"MaterialXGenShader.dll")
-copy_file(aurora_build_bin_folder,usd_lib_folder,"MaterialXRender.dll")
-copy_file(aurora_build_bin_folder,usd_lib_folder,"MaterialXRenderGlsl.dll")
-copy_file(aurora_build_bin_folder,usd_lib_folder,"MaterialXRenderHw.dll")
-copy_file(aurora_build_bin_folder,usd_lib_folder,"MaterialXRenderOsl.dll")
-if(not os.path.exists(usd_mtlx_folder)):
-    os.makedirs(aurora_mtlx_folder, exist_ok=True)
-    mtlx_files = glob.glob(os.path.join(aurora_mtlx_folder, "**"), recursive=True)
-    for mtlx_file in mtlx_files:
-        usd_mtlx_file = mtlx_file.replace(aurora_mtlx_folder,usd_mtlx_folder)
-        if(os.path.isfile(mtlx_file)):
-            copy_if_changed(mtlx_file,usd_mtlx_file)
-        else:
-            os.makedirs(usd_mtlx_file, exist_ok=True)
+    # Copy aurora and PDB (if it exists)
+    copy_file(aurora_build_lib_folder,usd_lib_folder,"libAurora.so")
+
+    # Copy compiler sos.
+    copy_file(os.path.join(args.externals_folder,"Slang/bin/linux-x64/release"),usd_lib_folder,"libslang.so")
+
+    # Copy MtlX libraries and library folders.
+    aurora_mtlx_lib_folder = os.path.join(args.externals_folder,"MaterialX/lib")
+    copy_file(aurora_mtlx_lib_folder,usd_lib_folder,"libMaterialXCore.so")
+    copy_file(aurora_mtlx_lib_folder,usd_lib_folder,"libMaterialXFormat.so")
+    copy_file(aurora_mtlx_lib_folder,usd_lib_folder,"libMaterialXGenGlsl.so")
+    copy_file(aurora_mtlx_lib_folder,usd_lib_folder,"libMaterialXGenMdl.so")
+    copy_file(aurora_mtlx_lib_folder,usd_lib_folder,"libMaterialXGenOsl.so")
+    copy_file(aurora_mtlx_lib_folder,usd_lib_folder,"libMaterialXGenShader.so")
+    copy_file(aurora_mtlx_lib_folder,usd_lib_folder,"libMaterialXRender.so")
+    copy_file(aurora_mtlx_lib_folder,usd_lib_folder,"libMaterialXRenderGlsl.so")
+    copy_file(aurora_mtlx_lib_folder,usd_lib_folder,"libMaterialXRenderHw.so")
+    copy_file(aurora_mtlx_lib_folder,usd_lib_folder,"libMaterialXRenderOsl.so")
+    if(not os.path.exists(usd_mtlx_folder)):
+        os.makedirs(aurora_mtlx_lib_folder, exist_ok=True)
+        mtlx_files = glob.glob(os.path.join(aurora_mtlx_lib_folder, "**"), recursive=True)
+        for mtlx_file in mtlx_files:
+            usd_mtlx_file = mtlx_file.replace(aurora_mtlx_lib_folder,usd_mtlx_folder)
+            if(os.path.isfile(mtlx_file)):
+                copy_if_changed(mtlx_file,usd_mtlx_file)
+            else:
+                os.makedirs(usd_mtlx_file, exist_ok=True)
+elif platform == "darwin":
+    raise NotImplementedError("Scripts/deployHdAurora.py does not support MacOS yet.")
+elif platform == "win32":
+    # Windows...
+    print("Deploying hdAurora on Windows")
+    # Copy plugin JSON.
+    copy_file(aurora_resource_folder,usd_hdaurora_resource_folder,"plugInfo.json")
+
+    # Copy hdAurora and PDB (if it exists)
+    copy_file(aurora_build_bin_folder,usd_plugin_folder,"hdAurora.dll")
+    copy_file(aurora_build_bin_folder,usd_plugin_folder,"hdAurora.pdb")
+
+    # Copy aurora and PDB (if it exists)
+    copy_file(aurora_build_bin_folder,usd_lib_folder,"Aurora.dll")
+    copy_file(aurora_build_bin_folder,usd_lib_folder,"Aurora.pdb")
+
+    # Copy compiler DLLs.
+    copy_file(aurora_build_bin_folder,usd_lib_folder,"dxcompiler.dll")
+    copy_file(aurora_build_bin_folder,usd_lib_folder,"dxil.dll")
+    copy_file(aurora_build_bin_folder,usd_lib_folder,"slang.dll")
+    copy_file(aurora_build_bin_folder,usd_lib_folder,"msvcp140.dll")
+    copy_file(aurora_build_bin_folder,usd_lib_folder,"glew32.dll")
+
+    # Copy MtlX libraries and library folders.
+    copy_file(aurora_build_bin_folder,usd_lib_folder,"MaterialXCore.dll")
+    copy_file(aurora_build_bin_folder,usd_lib_folder,"MaterialXFormat.dll")
+    copy_file(aurora_build_bin_folder,usd_lib_folder,"MaterialXGenGlsl.dll")
+    copy_file(aurora_build_bin_folder,usd_lib_folder,"MaterialXGenMdl.dll")
+    copy_file(aurora_build_bin_folder,usd_lib_folder,"MaterialXGenOsl.dll")
+    copy_file(aurora_build_bin_folder,usd_lib_folder,"MaterialXGenShader.dll")
+    copy_file(aurora_build_bin_folder,usd_lib_folder,"MaterialXRender.dll")
+    copy_file(aurora_build_bin_folder,usd_lib_folder,"MaterialXRenderGlsl.dll")
+    copy_file(aurora_build_bin_folder,usd_lib_folder,"MaterialXRenderHw.dll")
+    copy_file(aurora_build_bin_folder,usd_lib_folder,"MaterialXRenderOsl.dll")
+    if(not os.path.exists(usd_mtlx_folder)):
+        os.makedirs(aurora_mtlx_folder, exist_ok=True)
+        mtlx_files = glob.glob(os.path.join(aurora_mtlx_folder, "**"), recursive=True)
+        for mtlx_file in mtlx_files:
+            usd_mtlx_file = mtlx_file.replace(aurora_mtlx_folder,usd_mtlx_folder)
+            if(os.path.isfile(mtlx_file)):
+                copy_if_changed(mtlx_file,usd_mtlx_file)
+            else:
+                os.makedirs(usd_mtlx_file, exist_ok=True)
