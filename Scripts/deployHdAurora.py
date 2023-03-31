@@ -21,6 +21,11 @@ import pathlib
 import subprocess
 from sys import platform
 
+def Windows():
+    return platform.system() == "Windows"
+def Linux():
+    return platform.system() == "Linux"
+
 programDescription = """
 Deploy HdAurora to the provided USD folder (will build a new USD install if build argument provided)
 """
@@ -109,7 +114,7 @@ os.makedirs(usd_plugin_folder, exist_ok=True)
 os.makedirs(usd_hdaurora_resource_folder, exist_ok=True)
 
 
-if platform == "linux" or platform == "linux2":
+if Linux():
     # linux
     print("Deploying hdAurora on Linux")
     # Copy plugin JSON.
@@ -149,7 +154,7 @@ if platform == "linux" or platform == "linux2":
                 os.makedirs(usd_mtlx_file, exist_ok=True)
 elif platform == "darwin":
     raise NotImplementedError("Scripts/deployHdAurora.py does not support MacOS yet.")
-elif platform == "win32":
+elif Windows():
     # Windows...
     print("Deploying hdAurora on Windows")
     # Copy plugin JSON.
