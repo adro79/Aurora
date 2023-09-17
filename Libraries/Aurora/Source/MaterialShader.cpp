@@ -8,8 +8,10 @@
 // by any third party without the prior written consent of Autodesk, Inc.
 //
 #include "pch.h"
+#pragma GCC diagnostic ignored "-Wreorder-ctor"
 
 #include "MaterialShader.h"
+#include <string>
 
 BEGIN_AURORA
 
@@ -22,7 +24,7 @@ MaterialShader::MaterialShader(MaterialShaderLibrary* pShaderLibrary, int librar
 {
 
     // Initialize ref. counts to zero.
-    for (int i = 0; i < entryPoints.size(); i++)
+    for (size_t i = 0; i < entryPoints.size(); i++)
     {
         _entryPointNameLookup[entryPoints[i]] = i;
         _entryPoints.push_back({ entryPoints[i], 0 });
@@ -252,7 +254,7 @@ bool MaterialShaderLibrary::update(CompileShader compileFunction, DestroyShader 
 void MaterialShaderLibrary::forceRebuildAll()
 {
     // Add all active shaders to compilation pending list.
-    for (int i = 0; i < _shaderState.size(); i++)
+    for (size_t i = 0; i < _shaderState.size(); i++)
     {
         MaterialShaderPtr pShader = _shaderState[i].first.lock();
         if (pShader)
