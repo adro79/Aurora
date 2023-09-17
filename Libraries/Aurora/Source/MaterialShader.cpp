@@ -11,6 +11,7 @@
 #pragma GCC diagnostic ignored "-Wreorder-ctor"
 
 #include "MaterialShader.h"
+#include <string>
 
 BEGIN_AURORA
 
