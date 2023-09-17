@@ -10,6 +10,7 @@
 #include "pch.h"
 
 #include "MaterialDefinition.h"
+#include <vector>
 
 BEGIN_AURORA
 
