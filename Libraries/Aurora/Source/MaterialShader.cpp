@@ -8,6 +8,7 @@
 // by any third party without the prior written consent of Autodesk, Inc.
 //
 #include "pch.h"
+#pragma GCC diagnostic ignored "-Wreorder-ctor"
 
 #include "MaterialShader.h"
 
