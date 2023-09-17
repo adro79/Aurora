@@ -28,7 +28,7 @@ struct MaterialShaderSource
 {
     MaterialShaderSource(const string& id = "", const string& setupSource = "",
         const string& definitionsSource = "", const string& bsdfSource = "") :
-        uniqueId(id), setup(setupSource), definitions(definitionsSource), bsdf(bsdfSource)
+        uniqueId(id), setup(setupSource), bsdf(bsdfSource), definitions(definitionsSource)
     {
     }
 
