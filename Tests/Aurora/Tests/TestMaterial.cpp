@@ -1356,7 +1356,6 @@ TEST_P(MaterialTest, TestMaterialShadowTransparency)
     pScene->setImageDescriptor(kImagePath, imageData.descriptor);
 
     // Constant colors.
-    vec3 color0(0.5f, 1.0f, 0.3f);
     vec3 opacity0(0.5f, 0.5f, 0.3f);
 
     // Create geometry for teapot and plane geometry.
